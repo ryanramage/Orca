@@ -13,7 +13,7 @@ function Operator (orca, x, y, glyph = '.', passive = false) {
   // Actions
 
   this.listen = function (port, toValue = false) {
-    if (!port) { return (toValue ? 0 : '.') }
+    if (port === null || port === undefined || port === 0) { return (toValue ? 0 : '.') }
     const g = orca.glyphAt(this.x + port.x, this.y + port.y)
     const glyph = (g === '.' || g === '*') && port.default ? port.default : g
     if (toValue) {
@@ -77,9 +77,13 @@ function Operator (orca, x, y, glyph = '.', passive = false) {
   }
 
   this.move = function (x, y) {
+    console.log('current', this.x, this.y)
+    console.log('move', x, y)
     const offset = { x: this.x + x, y: this.y + y }
     if (!orca.inBounds(offset.x, offset.y)) { this.explode(); return }
+    console.log('checking glipph', offset.x, offset.y)
     const collider = orca.glyphAt(offset.x, offset.y)
+    console.log('collider', collider)
     if (collider !== '*' && collider !== '.') { this.explode(); return }
     this.erase()
     this.x += x

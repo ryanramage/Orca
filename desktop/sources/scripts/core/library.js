@@ -4,6 +4,87 @@
 /* global client */
 
 const library = {}
+//
+library['_'] = function Operator_ (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '_', passive)
+
+  this.name = 'niff'
+  this.info = 'Reads offset, if equal to char'
+
+  this.ports.x = { x: -2, y: 0 }
+  this.ports.y = { x: -1, y: 0 }
+  this.ports.comparison = { x: 1, y: 0 }
+  this.ports.output = { x: 0, y: 1, bang: true }
+
+  this.operation = function (force = false) {
+    const x = 0 - this.listen(this.ports.x, true)
+    const y = 0 - (this.listen(this.ports.y, true) + 1)
+    this.ports.val = {x, y }
+    const a = this.listen(this.ports.comparison)
+    const b = this.listen(this.ports.val)
+    return a !== b
+  }
+}
+
+library['◤'] = function Operator_ (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '◤', passive)
+  this.name = 'WScorner'
+  this.info = 'N->E'
+  this.ports.x = { x: 1, y: 0 }
+
+  this.operation = function (force = true) {
+    const x = this.listen(this.ports.x)
+    if (x !== 'N') return '.'
+    orca.write(this.x + 1, this.y, '.')
+    this.addPort('output', { x: 2, y: 0 })
+    return 'E'
+  }
+}
+
+library['◥'] = function Operator_ (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '◥', passive)
+  this.name = 'EScorner'
+  this.info = 'E->S'
+  this.ports.x = { x: -1, y: 0 }
+
+  this.operation = function (force = false) {
+    const x = this.listen(this.ports.x)
+    if (x !== 'E') return '.'
+    this.addPort('output', { x: 0, y: 1 })
+    return 'S'
+  }
+}
+
+library['◢'] = function Operator_ (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '◢', passive)
+  this.name = 'SWcorner'
+  this.info = 'S->W'
+  this.ports.x = { x: 0, y: -1 }
+
+  this.operation = function (force = false) {
+    const x = this.listen(this.ports.x)
+    if (x !== 'S') return '.'
+    this.addPort('output', { x: -1, y: 0 })
+    return 'W'
+  }
+}
+
+library['◣'] = function Operator_ (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '◣', passive)
+  this.name = 'WNcorner'
+  this.info = 'W->N'
+  this.ports.x = { x: 0, y: -1 }
+
+  this.operation = function (force = false) {
+    const x = this.listen(this.ports.x)
+    if (x !== 'W') return '.'
+    orca.write(this.x, this.y - 1, '.')
+    this.addPort('output', { x: 0, y: -2 })
+    return 'N'
+  }
+}
+
+
 
 library.a = function OperatorA (orca, x, y, passive) {
   Operator.call(this, orca, x, y, 'a', passive)
