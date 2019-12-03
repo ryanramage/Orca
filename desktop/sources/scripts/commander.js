@@ -140,9 +140,29 @@ function Commander (client) {
   }
 
   // Events
+  let lastCtrPress = null
 
   this.onKeyDown = (e) => {
+    if (e.ctrlKey) {
+      if ((Date.now() - lastCtrPress) < 500) {
+        client.extraSpecial = true
+        client.toggleGuide()
+        return
+      }
+      lastCtrPress = Date.now()
+    }
     if (e.ctrlKey || e.metaKey) { return }
+    if (client.guide) {
+      try {
+        const index = Number(e.key)
+        const operators = Object.keys(client.library).filter((val) => { return isNaN(val) }).filter( val => val.charCodeAt() >122 )
+        let operator = operators[index]
+        client.toggleGuide()
+        client.extraSpecial = false
+        client[this.isActive === true ? 'commander' : 'cursor'].write(operator)
+        return
+      } catch (e) {}
+    }
     client[this.isActive === true ? 'commander' : 'cursor'].write(e.key)
     e.stopPropagation()
   }

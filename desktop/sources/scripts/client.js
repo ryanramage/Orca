@@ -14,6 +14,7 @@
 function Client () {
   this.version = 161
   this.library = library
+  this.extraSpecial = false
 
   this.theme = new Theme(this)
   this.acels = new Acels(this)
@@ -335,14 +336,31 @@ function Client () {
 
   this.drawGuide = () => {
     if (this.guide !== true) { return }
-    const operators = Object.keys(this.library).filter((val) => { return isNaN(val) })
+    let operators = Object.keys(this.library).filter((val) => { return isNaN(val) })
+    let i = 0
+    let x = 0
+    let y = 0
+
+    if (this.extraSpecial) {
+      operators = operators.filter( val => val.charCodeAt() >122 )
+      x = this.cursor.x
+      y = this.cursor.y
+    }
+
     for (const id in operators) {
       const key = operators[id]
       const oper = new this.library[key]()
-      const text = oper.info
       const frame = this.orca.h - 4
-      const x = (Math.floor(parseInt(id) / frame) * 32) + 2
-      const y = (parseInt(id) % frame) + 2
+
+      let text = oper.info
+
+      if (this.extraSpecial) {
+        text = `${i++}`
+        y = y + 1
+      } else {
+        x = (Math.floor(parseInt(id) / frame) * 32) + 2
+        y = (parseInt(id) % frame) + 2
+      }
       this.write(key, x, y, 99, 3)
       this.write(text, x + 2, y, 99, 10)
     }

@@ -5,7 +5,7 @@
 
 const library = {}
 //
-library['_'] = function Operator_ (orca, x, y, passive) {
+library['ↀ'] = function Operator_ (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '_', passive)
 
   this.name = 'niff'
