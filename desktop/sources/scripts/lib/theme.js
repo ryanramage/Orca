@@ -11,13 +11,13 @@ function Theme (client) {
   this.active = {}
   this.default = {
     background: '#eeeeee',
-    f_high: '#000000',
-    f_med: '#666666',
-    f_low: '#888888',
-    f_inv: '#000000',
-    b_high: '#cccccc',
-    b_med: '#dddddd',
-    b_low: '#ffffff',
+    f_high: '#00FF33',
+    f_med: '#006f00',
+    f_low: '#003400',
+    f_inv: '#001100',
+    b_high: '#4a8500',
+    b_med: '#83ff83',
+    b_low: '#aeffaa',
     b_inv: '#ffb545'
   }
 
@@ -57,15 +57,15 @@ function Theme (client) {
     const theme = this.parse(data)
     if (!isValid(theme)) { console.warn('Theme', 'Invalid format'); return }
     console.log('Theme', 'Loaded theme!')
-    this.el.innerHTML = `:root { 
-      --background: ${theme.background}; 
-      --f_high: ${theme.f_high}; 
-      --f_med: ${theme.f_med}; 
-      --f_low: ${theme.f_low}; 
-      --f_inv: ${theme.f_inv}; 
-      --b_high: ${theme.b_high}; 
-      --b_med: ${theme.b_med}; 
-      --b_low: ${theme.b_low}; 
+    this.el.innerHTML = `:root {
+      --background: ${theme.background};
+      --f_high: ${theme.f_high};
+      --f_med: ${theme.f_med};
+      --f_low: ${theme.f_low};
+      --f_inv: ${theme.f_inv};
+      --b_high: ${theme.b_high};
+      --b_med: ${theme.b_med};
+      --b_low: ${theme.b_low};
       --b_inv: ${theme.b_inv};
     }`
     localStorage.setItem('theme', JSON.stringify(theme))

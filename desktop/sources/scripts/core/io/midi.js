@@ -37,6 +37,7 @@ function Midi (client) {
   }
 
   this.trigger = function (item, down) {
+    console.log(item)
     if (!this.outputDevice()) { console.warn('MIDI', 'No midi output!'); return }
 
     const transposed = this.transpose(item.note, item.octave)
