@@ -2,7 +2,7 @@
 
 function MidiCC (client) {
   this.stack = []
-  this.offset = 64
+  this.offset = 40
 
   this.start = function () {
     console.info('MidiCC', 'Starting..')

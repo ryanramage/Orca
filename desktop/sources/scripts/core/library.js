@@ -5,7 +5,57 @@
 
 const library = {}
 //
-library['ↀ'] = function Operator_ (orca, x, y, passive) {
+
+// https://unicode-table.com
+
+library['∫'] = function (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '∫', true)
+
+  this.name = 'beatbar'
+  this.info = 'count bars based on criteria'
+  this.draw = false
+
+  this.ports.beat = { x: -2, y: 0, default: '4' }
+  this.ports.bar = { x: -1, y: 0, default: '4' }
+  this.ports.len = { x: 1, y: 0, default: '8' }
+  this.ports.output = { x: 0, y: 1, sensitive: true }
+
+  this.operation = function (force = false) {
+    const beat = this.listen(this.ports.beat, true)
+    const bar = this.listen(this.ports.bar, true)
+    const len = this.listen(this.ports.len, true)
+
+    let beats = Math.floor((orca.f / beat) / bar)
+    let barOn = beats % len
+    return orca.keyOf(barOn)
+  }
+
+}
+
+library['ᚖ'] = function (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, 'ᚖ', true)
+
+  this.name = 'images'
+  this.info = 'sets background image'
+  this.draw = false
+
+  this.operation = function (force = false) {
+    const x = 0 - this.listen(this.ports.x, true)
+    const y = 0 - (this.listen(this.ports.y, true) + 1)
+    this.ports.val = {x, y }
+    const a = this.listen(this.ports.comparison)
+    const b = this.listen(this.ports.val)
+    return a !== b
+  }
+
+  this.operation = function () {
+    let _url = 'https://pbs.twimg.com/media/ELaaI-pXsAA_jnO?format=jpg&name=4096x4096'
+    document.body.style.backgroundImage = `url("${_url}")`
+  }
+}
+
+
+library['ↀ'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '_', passive)
 
   this.name = 'niff'
@@ -26,7 +76,7 @@ library['ↀ'] = function Operator_ (orca, x, y, passive) {
   }
 }
 
-library['◤'] = function Operator_ (orca, x, y, passive) {
+library['◤'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '◤', passive)
   this.name = 'WScorner'
   this.info = 'N->E'
@@ -41,7 +91,7 @@ library['◤'] = function Operator_ (orca, x, y, passive) {
   }
 }
 
-library['◥'] = function Operator_ (orca, x, y, passive) {
+library['◥'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '◥', passive)
   this.name = 'EScorner'
   this.info = 'E->S'
@@ -55,7 +105,7 @@ library['◥'] = function Operator_ (orca, x, y, passive) {
   }
 }
 
-library['◢'] = function Operator_ (orca, x, y, passive) {
+library['◢'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '◢', passive)
   this.name = 'SWcorner'
   this.info = 'S->W'
@@ -69,7 +119,7 @@ library['◢'] = function Operator_ (orca, x, y, passive) {
   }
 }
 
-library['◣'] = function Operator_ (orca, x, y, passive) {
+library['◣'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '◣', passive)
   this.name = 'WNcorner'
   this.info = 'W->N'
