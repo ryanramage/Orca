@@ -9,7 +9,75 @@ const library = {}
 
 // https://unicode-table.com
 
-console.log(Tonal)
+
+library['⎐'] = function (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '⎐', passive)
+
+  this.name = 'multiwrite'
+  this.info = 'Writes multiple variables'
+
+  this.ports.len = { x: -1, y: 0, clamp: { min: 1 }, default: '6' }
+
+  this.operation = function (force = false) {
+    this.len = this.listen(this.ports.len, true)
+    for (let offset = 0; offset < this.len; offset++) {
+      //orca.lock(this.x + offset + 1, this.y)
+      //orca.lock(this.x + offset + 1, this.y + 1)
+      let inPort = { x: offset + 1, y: 0 }
+      let varPort = { x: offset + 1, y: 1 }
+      this.addPort(`in${offset}`, inPort)
+      this.addPort(`var${offset}`, varPort)
+      let val = this.listen(inPort)
+      let _var = this.listen(varPort)
+      if (_var !== '.') {
+        orca.variables[_var] = val
+      }
+    }
+  }
+}
+
+
+library['∀'] = function (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '∀', passive)
+
+  this.name = 'quard'
+  this.info = 'Reads a chord, outputs notes'
+
+  this.ports.x = { x: -3, y: 0, default: '1'}
+  this.ports.y = { x: -2, y: 0 }
+  this.ports.len = { x: -1, y: 0, clamp: { min: 1 }, default: '8' }
+
+  this.operation = function (force = false) {
+    const len = this.listen(this.ports.len, true)
+    const x = this.listen(this.ports.x, true)
+    const y = this.listen(this.ports.y, true)
+    let chordNameArray = []
+
+    for (let offset = 0; offset < len; offset++) {
+      const inPort = { x: x + offset + 1, y: y }
+      this.addPort(`in${offset}`, inPort)
+      const res = this.listen(inPort)
+      if (res !== '.') chordNameArray.push(res)
+    }
+    let chordName = chordNameArray.join('')
+    let notes = Tonal.Chord.notes(chordName)
+    notes = notes.filter(n => n && n.length).map(n => {
+      if (n.length == 1) return n
+      if (n[1] === 'b') return Tonal.Note.enharmonic(n)[0].toLowerCase()
+      if (n[1] === '#') return n[0].toLowerCase()
+      return n[0].toLowerCase()
+    })
+
+    for (let offset = 0; offset < 6; offset++) {
+      const outPort = { x: offset - 7 + 1, y: 1, output: true }
+      this.addPort(`out${offset}`, outPort)
+      let note = notes[offset]
+      if (!note) note = '.'
+      this.output(`${note}`, outPort)
+    }
+  }
+}
+
 
 library['∴'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '∴', true)
