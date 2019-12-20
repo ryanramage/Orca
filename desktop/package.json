@@ -23,7 +23,8 @@
     "electron-packager": "^14.1.0"
   },
   "dependencies": {
-    "node-osc": "^4.1.1"
+    "node-osc": "^4.1.1",
+    "tonal": "^2.2.2"
   },
   "standard": {
     "globals": [

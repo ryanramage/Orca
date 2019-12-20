@@ -1,5 +1,6 @@
 'use strict'
 
+const Tonal = require('tonal')
 /* global Operator */
 /* global client */
 
@@ -7,6 +8,52 @@ const library = {}
 //
 
 // https://unicode-table.com
+
+console.log(Tonal)
+
+library['∴'] = function (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '∴', true)
+  this.name = 'chords'
+  this.info = 'generate chords notes'
+
+  this.ports.chord = { x: -1, y: 0 , default: '0'}
+  //this.ports.octave = { x: -1, y: 0 , default: '3'}
+
+  this.operation = function (force = false) {
+    const chord = this.listen(this.ports.chord, true)
+    //const octave = this.listen(this.ports.octave, true)
+
+    let msg = ''
+    for (let x = 1; x <= 36; x++) {
+      const g = orca.glyphAt(this.x + x, this.y)
+      orca.lock(this.x + x, this.y)
+      if (g === '.') { break }
+      msg += g
+    }
+    if (msg === '') { return }
+    this.draw = false
+
+    let chords = msg.split('!').filter(str => str.length).map(str => Tonal.Chord.notes(str))
+    if (!chords.length) return
+    let index = chord % chords.length
+    let _chord = chords[index]
+    if (!_chord) return
+    let notes = _chord.map(n => {
+      if (n.length == 1) return n
+      return n[0].toLowerCase()
+    })
+    for (let offset = 0; offset < 6; offset++) {
+      const outPort = { x: 1, y:  1 + offset, output: true }
+      this.addPort(`out${offset}`, outPort)
+      let note = notes[offset]
+      if (!note) note = '.'
+      this.output(`${note}`, outPort)
+    }
+
+
+  }
+
+}
 
 library['∫'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '∫', true)
@@ -861,4 +908,21 @@ for (let i = 0; i <= 9; i++) {
 
     }
   }
+}
+
+function getScale (tonicOctScale) {
+  tonicOctScale = tonicOctScale.toLowerCase()
+  tonicOctScale = tonicOctScale.replace('!', ' ')
+
+  // In Tonal, the only scales that are not entirely lower case are
+  // lydian #5P pentatonic and minor #7M pentatonic,
+  // hence make provision for them separately
+  tonicOctScale = tonicOctScale.replace('#5p', '#5P')
+  tonicOctScale = tonicOctScale.replace('#7m', '#7M')
+
+  const tokenizedName = Tonal.Scale.tokenize(tonicOctScale)
+  const scaleName = tokenizedName[1]
+
+  if (!Tonal.Scale.exists(scaleName)) return null
+  return Tonal.Scale.notes(tonicOctScale).map(Tonal.Note.simplify)
 }

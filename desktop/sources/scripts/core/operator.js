@@ -77,13 +77,9 @@ function Operator (orca, x, y, glyph = '.', passive = false) {
   }
 
   this.move = function (x, y) {
-    console.log('current', this.x, this.y)
-    console.log('move', x, y)
     const offset = { x: this.x + x, y: this.y + y }
     if (!orca.inBounds(offset.x, offset.y)) { this.explode(); return }
-    console.log('checking glipph', offset.x, offset.y)
     const collider = orca.glyphAt(offset.x, offset.y)
-    console.log('collider', collider)
     if (collider !== '*' && collider !== '.') { this.explode(); return }
     this.erase()
     this.x += x
