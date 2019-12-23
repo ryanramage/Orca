@@ -107,51 +107,6 @@ library['∀'] = function (orca, x, y, passive) {
   }
 }
 
-
-library['∴'] = function (orca, x, y, passive) {
-  Operator.call(this, orca, x, y, '∴', true)
-  this.name = 'chords'
-  this.info = 'generate chords notes'
-
-  this.ports.chord = { x: -1, y: 0 , default: '0'}
-  //this.ports.octave = { x: -1, y: 0 , default: '3'}
-
-  this.operation = function (force = false) {
-    const chord = this.listen(this.ports.chord, true)
-    //const octave = this.listen(this.ports.octave, true)
-
-    let msg = ''
-    for (let x = 1; x <= 36; x++) {
-      const g = orca.glyphAt(this.x + x, this.y)
-      orca.lock(this.x + x, this.y)
-      if (g === '.') { break }
-      msg += g
-    }
-    if (msg === '') { return }
-    this.draw = false
-
-    let chords = msg.split('!').filter(str => str.length).map(str => Tonal.Chord.notes(str))
-    if (!chords.length) return
-    let index = chord % chords.length
-    let _chord = chords[index]
-    if (!_chord) return
-    let notes = _chord.map(n => {
-      if (n.length == 1) return n
-      return n[0].toLowerCase()
-    })
-    for (let offset = 0; offset < 6; offset++) {
-      const outPort = { x: 1, y:  1 + offset, output: true }
-      this.addPort(`out${offset}`, outPort)
-      let note = notes[offset]
-      if (!note) note = '.'
-      this.output(`${note}`, outPort)
-    }
-
-
-  }
-
-}
-
 library['∫'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '∫', true)
 
@@ -195,28 +150,6 @@ library['ᚖ'] = function (orca, x, y, passive) {
   this.operation = function () {
     let _url = 'https://pbs.twimg.com/media/ELaaI-pXsAA_jnO?format=jpg&name=4096x4096'
     document.body.style.backgroundImage = `url("${_url}")`
-  }
-}
-
-
-library['ↀ'] = function (orca, x, y, passive) {
-  Operator.call(this, orca, x, y, '_', passive)
-
-  this.name = 'niff'
-  this.info = 'Reads offset, if equal to char'
-
-  this.ports.x = { x: -2, y: 0 }
-  this.ports.y = { x: -1, y: 0 }
-  this.ports.comparison = { x: 1, y: 0 }
-  this.ports.output = { x: 0, y: 1, bang: true }
-
-  this.operation = function (force = false) {
-    const x = 0 - this.listen(this.ports.x, true)
-    const y = 0 - (this.listen(this.ports.y, true) + 1)
-    this.ports.val = {x, y }
-    const a = this.listen(this.ports.comparison)
-    const b = this.listen(this.ports.val)
-    return a !== b
   }
 }
 
@@ -277,8 +210,6 @@ library['◣'] = function (orca, x, y, passive) {
     return 'N'
   }
 }
-
-
 
 library.a = function OperatorA (orca, x, y, passive) {
   Operator.call(this, orca, x, y, 'a', passive)
