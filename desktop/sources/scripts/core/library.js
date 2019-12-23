@@ -9,6 +9,37 @@ const library = {}
 
 // https://unicode-table.com
 
+library['⩲'] = function (orca, x,y, passive) {
+  Operator.call(this, orca, x, y, '⩲', passive)
+
+  this.name = 'inc-if'
+  this.info = 'increment if equal'
+
+  this.ports.input = { x: -1, y: 0 }
+  this.ports.comparison = { x: 1, y: 0 }
+  this.ports.mod = { x: 2, y: 0, default: 'A' }
+  this.ports.output = { x: 0, y: 1 }
+
+  this.operation = function (force = false) {
+    orca.infos = orca.infos || {}
+    let id = `${this.x}|${this.y}`
+    let curr = orca.infos[id] || { flipped: false, val: 0 }
+    const a = this.listen(this.ports.input)
+    const b = this.listen(this.ports.comparison)
+    const mod = this.listen(this.ports.mod, true)
+    if (a !== '.' && b !== '.') {
+      if (a !== b) {
+        if (curr.flipped) curr.flipped = false
+      } else if (!curr.flipped) {
+        curr.val = (curr.val + 1) % mod
+        curr.flipped = true
+      }
+    }
+    orca.infos[id] = curr
+    return orca.keyOf(curr.val)
+  }
+}
+
 
 library['⎐'] = function (orca, x, y, passive) {
   Operator.call(this, orca, x, y, '⎐', passive)
@@ -21,8 +52,6 @@ library['⎐'] = function (orca, x, y, passive) {
   this.operation = function (force = false) {
     this.len = this.listen(this.ports.len, true)
     for (let offset = 0; offset < this.len; offset++) {
-      //orca.lock(this.x + offset + 1, this.y)
-      //orca.lock(this.x + offset + 1, this.y + 1)
       let inPort = { x: offset + 1, y: 0 }
       let varPort = { x: offset + 1, y: 1 }
       this.addPort(`in${offset}`, inPort)
