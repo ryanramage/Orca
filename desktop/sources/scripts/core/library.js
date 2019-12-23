@@ -1,6 +1,7 @@
 'use strict'
 
 const Tonal = require('tonal')
+const Key = require('@tonaljs/key')
 /* global Operator */
 /* global client */
 
@@ -8,6 +9,104 @@ const library = {}
 //
 
 // https://unicode-table.com
+
+library['⨁'] = function (orca, x,y, passive) {
+  Operator.call(this, orca, x, y, '⨁', passive)
+
+  this.name = 'key'
+  this.info = 'output chords for the key'
+
+  this.operation = function (force = false) {
+
+    let msg = ''
+    for (let x = 1; x <= 36; x++) {
+      const g = orca.glyphAt(this.x + x, this.y)
+      orca.lock(this.x + x, this.y)
+      if (g === '.') { break }
+      msg += g
+    }
+    if (msg === '') { return }
+    this.draw = false
+    let parts = msg.split('!')
+    let keyName = parts[0]
+    let typeAbbr = parts[1] || 'M'
+    let type = (typeAbbr === 'M') ? 'major' : "minor"
+    let minorTypeAbbr = parts[2] || 'n'
+    let minorType = 'natural'
+    if (minorTypeAbbr === 'h') minorType = 'harmonic'
+    if (minorTypeAbbr === 'm') minorType = 'melodic'
+
+    let key = Key[`${type}Key`](keyName)
+    let chords = []
+    if (type === 'major') {
+      chords = key.chords
+    } else if (type === 'minor' && key[minorType] && key[minorType].chords) {
+      chords = key[minorType].chords
+    }
+    if (!chords.length) retun
+    console.log(chords)
+    // write out all the chords
+    for (let i = 0; i < chords.length; i++) {
+      let chord = chords[i]
+      for (let j = 0; j <= 10; j++) {
+        if (j === 0) orca.write(this.x, this.y + i + 1, '#')
+        else if (j === 10) orca.write(this.x + 10, this.y + i + 1, '#')
+        else {
+          let letter = chord[j -1]
+          if (letter) {
+            if (letter === '#') letter = '%'
+            if (letter === '+') letter = '*'
+            orca.write(this.x + j, this.y + i + 1, letter)
+          }
+          else orca.write(this.x + j, this.y + i + 1, '.')
+        }
+      }
+    }
+  }
+}
+
+library['∀'] = function (orca, x, y, passive) {
+  Operator.call(this, orca, x, y, '∀', passive)
+
+  this.name = 'quard'
+  this.info = 'Reads a chord, outputs notes'
+
+  this.ports.y = { x: -1, y: 0 }
+
+  this.operation = function (force = false) {
+    const len = 8
+    const x = 1
+    const y = this.listen(this.ports.y, true)
+    let chordNameArray = []
+
+    for (let offset = 0; offset < len; offset++) {
+      const inPort = { x: x + offset + 1, y: y + 1}
+      this.addPort(`in${offset}`, inPort)
+      let res = this.listen(inPort)
+      if (res !== '.') {
+        if (res === '%') res = '#'
+        if (res === '*') res = '+'
+        chordNameArray.push(res)
+      }
+    }
+    let chordName = chordNameArray.join('')
+    let notes = Tonal.Chord.notes(chordName)
+    notes = notes.filter(n => n && n.length).map(n => {
+      if (n.length == 1) return n
+      if (n[1] === 'b') return Tonal.Note.enharmonic(n)[0].toLowerCase()
+      if (n[1] === '#') return n[0].toLowerCase()
+      return n[0].toLowerCase()
+    })
+
+    for (let offset = 0; offset < 6; offset++) {
+      const outPort = { x: offset - 7 + 1, y: 1, output: true }
+      this.addPort(`out${offset}`, outPort)
+      let note = notes[offset]
+      if (!note) note = '.'
+      this.output(`${note}`, outPort)
+    }
+  }
+}
 
 library['⩲'] = function (orca, x,y, passive) {
   Operator.call(this, orca, x, y, '⩲', passive)
@@ -61,48 +160,6 @@ library['⎐'] = function (orca, x, y, passive) {
       if (_var !== '.') {
         orca.variables[_var] = val
       }
-    }
-  }
-}
-
-
-library['∀'] = function (orca, x, y, passive) {
-  Operator.call(this, orca, x, y, '∀', passive)
-
-  this.name = 'quard'
-  this.info = 'Reads a chord, outputs notes'
-
-  this.ports.x = { x: -3, y: 0, default: '1'}
-  this.ports.y = { x: -2, y: 0 }
-  this.ports.len = { x: -1, y: 0, clamp: { min: 1 }, default: '8' }
-
-  this.operation = function (force = false) {
-    const len = this.listen(this.ports.len, true)
-    const x = this.listen(this.ports.x, true)
-    const y = this.listen(this.ports.y, true)
-    let chordNameArray = []
-
-    for (let offset = 0; offset < len; offset++) {
-      const inPort = { x: x + offset + 1, y: y }
-      this.addPort(`in${offset}`, inPort)
-      const res = this.listen(inPort)
-      if (res !== '.') chordNameArray.push(res)
-    }
-    let chordName = chordNameArray.join('')
-    let notes = Tonal.Chord.notes(chordName)
-    notes = notes.filter(n => n && n.length).map(n => {
-      if (n.length == 1) return n
-      if (n[1] === 'b') return Tonal.Note.enharmonic(n)[0].toLowerCase()
-      if (n[1] === '#') return n[0].toLowerCase()
-      return n[0].toLowerCase()
-    })
-
-    for (let offset = 0; offset < 6; offset++) {
-      const outPort = { x: offset - 7 + 1, y: 1, output: true }
-      this.addPort(`out${offset}`, outPort)
-      let note = notes[offset]
-      if (!note) note = '.'
-      this.output(`${note}`, outPort)
     }
   }
 }
