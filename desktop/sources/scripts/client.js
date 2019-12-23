@@ -12,7 +12,7 @@
 /* global Theme */
 
 function Client () {
-  this.version = 161
+  this.version = 164
   this.library = library
   this.extraSpecial = false
 
@@ -48,9 +48,10 @@ function Client () {
 
     this.acels.set('File', 'New', 'CmdOrCtrl+N', () => { this.reset() })
     this.acels.set('File', 'Open', 'CmdOrCtrl+O', () => { this.source.open('orca', this.whenOpen, true) })
-    this.acels.set('File', 'Load Modules', 'CmdOrCtrl+L', () => { this.source.load('orca') })
-    this.acels.set('File', 'Load Images', 'CmdOrCtrl+Shift+L', () => { this.source.load('jpg') })
-    this.acels.set('File', 'Save', 'CmdOrCtrl+S', () => { this.source.write('orca', 'orca', `${this.orca}`, 'text/plain') })
+    this.acels.set('File', 'Import Modules', 'CmdOrCtrl+L', () => { this.source.load('orca') })
+    this.acels.set('File', 'Import Images', 'CmdOrCtrl+Shift+L', () => { this.source.load('jpg') })
+    this.acels.set('File', 'Export', 'CmdOrCtrl+S', () => { this.source.write('orca', 'orca', `${this.orca}`, 'text/plain') })
+    this.acels.set('File', 'Export Selection', 'CmdOrCtrl+Shift+S', () => { this.source.write('orca', 'orca', `${this.cursor.selection()}`, 'text/plain') })
 
     this.acels.add('Edit', 'cut')
     this.acels.add('Edit', 'copy')
@@ -115,9 +116,9 @@ function Client () {
     this.acels.set('View', 'Zoom Out', 'CmdOrCtrl+-', () => { this.modZoom(-0.0625) })
     this.acels.set('View', 'Zoom Reset', 'CmdOrCtrl+0', () => { this.modZoom(1, true) })
 
-    this.acels.set('Midi', 'Play/Pause Midi', 'Shift+Space', () => { this.clock.togglePlay(true) })
-    this.acels.set('Midi', 'Next Input Device', 'CmdOrCtrl+}', () => { this.io.midi.selectNextInput() })
-    this.acels.set('Midi', 'Next Output Device', 'CmdOrCtrl+]', () => { this.io.midi.selectNextOutput() })
+    this.acels.set('Midi', 'Play/Pause Midi', 'CmdOrCtrl+Space', () => { this.clock.togglePlay(true) })
+    this.acels.set('Midi', 'Next Input Device', 'CmdOrCtrl+,', () => { this.clock.setFrame(0); this.io.midi.selectNextInput() })
+    this.acels.set('Midi', 'Next Output Device', 'CmdOrCtrl+.', () => { this.clock.setFrame(0); this.io.midi.selectNextOutput() })
     this.acels.set('Midi', 'Refresh Devices', 'CmdOrCtrl+Shift+M', () => { this.io.midi.refresh() })
 
     this.acels.set('Communication', 'Choose OSC Port', 'alt+O', () => { this.commander.start('osc:') })
@@ -172,7 +173,7 @@ function Client () {
   }
 
   this.whenOpen = (file, text) => {
-    const lines = text.trim().split('\n')
+    const lines = text.trim().split(/\r?\n/)
     const w = lines[0].length
     const h = lines.length
     const s = lines.join('\n').trim()
@@ -316,12 +317,12 @@ function Client () {
   }
 
   this.drawInterface = () => {
-    this.write(`${this.cursor.inspect()}`, this.grid.w * 0, this.orca.h, this.grid.w)
+    this.write(`${this.cursor.inspect()}`, this.grid.w * 0, this.orca.h, this.grid.w - 1)
     this.write(`${this.cursor.x},${this.cursor.y}${this.cursor.ins ? '+' : ''}`, this.grid.w * 1, this.orca.h, this.grid.w, this.cursor.ins ? 1 : 2)
     this.write(`${this.cursor.w}:${this.cursor.h}`, this.grid.w * 2, this.orca.h, this.grid.w)
     this.write(`${this.orca.f}f${this.clock.isPaused ? '~' : ''}`, this.grid.w * 3, this.orca.h, this.grid.w)
-    this.write(`${this.io.inspect(this.grid.w)}`, this.grid.w * 4, this.orca.h, this.grid.w)
-    this.write(`${display(Object.keys(this.orca.variables).join(''), this.orca.f, this.grid.w)}`, this.grid.w * 5, this.orca.h, this.grid.w)
+    this.write(`${this.io.inspect(this.grid.w)}`, this.grid.w * 4, this.orca.h, this.grid.w - 1)
+    this.write(this.orca.f < 500 ? `< ${this.io.midi.toInputString()}` : '', this.grid.w * 5, this.orca.h, this.grid.w * 4)
 
     if (this.commander.isActive === true) {
       this.write(`${this.commander.query}${this.orca.f % 2 === 0 ? '_' : ''}`, this.grid.w * 0, this.orca.h + 1, this.grid.w * 4)
@@ -330,7 +331,8 @@ function Client () {
       this.write(`${this.orca.w}x${this.orca.h}`, this.grid.w * 1, this.orca.h + 1, this.grid.w)
       this.write(`${this.grid.w}/${this.grid.h}${this.tile.w !== 10 ? ' ' + (this.tile.w / 10).toFixed(1) : ''}`, this.grid.w * 2, this.orca.h + 1, this.grid.w)
       this.write(`${this.clock}`, this.grid.w * 3, this.orca.h + 1, this.grid.w, this.clock.isPuppet === true ? 3 : 2)
-      this.write(`${this.io.midi}`, this.grid.w * 4, this.orca.h + 1, this.grid.w * 4)
+      this.write(`${display(Object.keys(this.orca.variables).join(''), this.orca.f, this.grid.w - 1)}`, this.grid.w * 4, this.orca.h + 1, this.grid.w - 1)
+      this.write(this.orca.f < 500 ? `> ${this.io.midi.toOutputString()}` : '', this.grid.w * 5, this.orca.h + 1, this.grid.w * 4)
     }
   }
 
@@ -426,13 +428,13 @@ function Client () {
     if (h > this.orca.h) {
       block = `${block}${`\n${'.'.repeat(this.orca.w)}`.repeat((h - this.orca.h))}`
     } else if (h < this.orca.h) {
-      block = `${block}`.split('\n').slice(0, (h - this.orca.h)).join('\n').trim()
+      block = `${block}`.split(/\r?\n/).slice(0, (h - this.orca.h)).join('\n').trim()
     }
 
     if (w > this.orca.w) {
-      block = `${block}`.split('\n').map((val) => { return val + ('.').repeat((w - this.orca.w)) }).join('\n').trim()
+      block = `${block}`.split(/\r?\n/).map((val) => { return val + ('.').repeat((w - this.orca.w)) }).join('\n').trim()
     } else if (w < this.orca.w) {
-      block = `${block}`.split('\n').map((val) => { return val.substr(0, val.length + (w - this.orca.w)) }).join('\n').trim()
+      block = `${block}`.split(/\r?\n/).map((val) => { return val.substr(0, val.length + (w - this.orca.w)) }).join('\n').trim()
     }
 
     this.history.reset()
