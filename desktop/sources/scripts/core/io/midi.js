@@ -206,7 +206,7 @@ function Midi (client) {
     for (let i = inputs.next(); i && !i.done; i = inputs.next()) {
       this.inputs.push(i.value)
     }
-    this.selectInput(-1)
+    this.selectInput(1)
   }
 
   // UI
