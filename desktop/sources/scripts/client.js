@@ -135,7 +135,7 @@ function Client () {
     this.io.start()
     this.history.bind(this.orca, 's')
     this.history.record(this.orca.s)
-    this.clock.start()
+    //this.clock.start()
     this.cursor.start()
 
     this.reset()
@@ -152,7 +152,7 @@ function Client () {
     this.source.new()
     this.history.reset()
     this.cursor.reset()
-    this.clock.play()
+    //this.clock.play()
   }
 
   this.run = () => {

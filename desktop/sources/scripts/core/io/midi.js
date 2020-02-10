@@ -128,6 +128,10 @@ function Midi (client) {
   this.receive = function (msg) {
     switch (msg.data[0]) {
       // Clock
+      case 0xF2:
+        var mpp = (msg.data[2] << 7) + msg.data[1] // data2 is msb, data1 is lsb
+        console.log('MIDI', 'POINTES',  cpp)
+        break;
       case 0xF8:
         client.clock.tap()
         break
@@ -141,13 +145,13 @@ function Midi (client) {
         break
       case 0xFC:
         console.log('MIDI', 'Stop Received')
+        //client.clock.setFrame(0)
         client.clock.stop()
         break
     }
   }
 
   // Tools
-
   this.selectOutput = function (id) {
     if (id === -1) { this.outputIndex = -1; console.log('MIDI', 'Select Output Device: None'); return }
     if (!this.outputs[id]) { return }

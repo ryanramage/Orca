@@ -8,7 +8,7 @@ function Clock (client) {
 
   this.isPaused = true
   this.timer = null
-  this.isPuppet = false
+  this.isPuppet = true
 
   this.speed = { value: 120, target: 120 }
 
@@ -59,18 +59,16 @@ function Clock (client) {
   this.play = function (msg = false) {
     console.log('Clock', 'Play', msg)
     if (this.isPaused === false) { return }
-    if (this.isPuppet === true) { console.warn('Clock', 'External Midi control'); return }
+    //if (this.isPuppet === true) { console.warn('Clock', 'External Midi control'); return }
     this.isPaused = false
-    if (msg === true) { client.io.midi.sendClockStart() }
+    //if (msg === true) { client.io.midi.sendClockStart() }
     this.setSpeed(this.speed.target, this.speed.target, true)
   }
 
   this.stop = function (msg = false) {
     console.log('Clock', 'Stop')
     if (this.isPaused === true) { return }
-    if (this.isPuppet === true) { console.warn('Clock', 'External Midi control'); return }
     this.isPaused = true
-    if (msg === true) { client.io.midi.sendClockStop() }
     client.io.midi.allNotesOff()
     this.clearTimer()
     client.io.midi.silence()
@@ -82,30 +80,16 @@ function Clock (client) {
 
   this.tap = function () {
     pulse.last = performance.now()
-    if (!this.isPuppet) {
-      console.log('Clock', 'Puppeteering starts..')
-      this.isPuppet = true
-      this.clearTimer()
-      pulse.timer = setInterval(() => {
-        if (performance.now() - pulse.last < 2000) { return }
-        this.untap()
-      }, 2000)
+    if (this.isPaused) {
+      console.log('paused')
+      return
     }
-    if (this.isPaused) { return }
     pulse.count = pulse.count + 1
+    //console.log('pulse count', pulse.count)
     if (pulse.count % 6 === 0) {
       client.run()
       pulse.count = 0
     }
-  }
-
-  this.untap = function () {
-    console.log('Clock', 'Puppeteering stops..')
-    clearInterval(pulse.timer)
-    this.isPuppet = false
-    pulse.count = 1
-    pulse.last = null
-    this.setTimer(this.speed.value)
   }
 
   // Timer
