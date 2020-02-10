@@ -129,8 +129,12 @@ function Midi (client) {
     switch (msg.data[0]) {
       // Clock
       case 0xF2:
+        // learned from http://djipco.github.io/webmidi/latest/files/src_webmidi.js.html#l2124
         var mpp = (msg.data[2] << 7) + msg.data[1] // data2 is msb, data1 is lsb
-        console.log('MIDI', 'POINTES',  cpp)
+        var frame = (((mpp * 6) / 24)) * 4
+        client.clock.setFrame(frame)
+        console.log('current frame', client.orca.f)
+        console.log('MIDI', 'POINTES',  mpp, frame)
         break;
       case 0xF8:
         client.clock.tap()

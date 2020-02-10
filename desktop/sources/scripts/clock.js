@@ -30,10 +30,10 @@ function Clock (client) {
   }
 
   this.setSpeed = (value, target = null, setTimer = false) => {
-    if (this.speed.value === value && this.speed.target === target && this.timer) { return }
-    if (value) { this.speed.value = clamp(value, 60, 300) }
-    if (target) { this.speed.target = clamp(target, 60, 300) }
-    if (setTimer === true) { this.setTimer(this.speed.value) }
+    // if (this.speed.value === value && this.speed.target === target && this.timer) { return }
+    // if (value) { this.speed.value = clamp(value, 60, 300) }
+    // if (target) { this.speed.target = clamp(target, 60, 300) }
+    // if (setTimer === true) { this.setTimer(this.speed.value) }
   }
 
   this.modSpeed = function (mod = 0, animate = false) {
@@ -87,6 +87,7 @@ function Clock (client) {
     pulse.count = pulse.count + 1
     //console.log('pulse count', pulse.count)
     if (pulse.count % 6 === 0) {
+      console.log(client.orca.f)
       client.run()
       pulse.count = 0
     }
@@ -95,22 +96,22 @@ function Clock (client) {
   // Timer
 
   this.setTimer = function (bpm) {
-    if (bpm < 60) { console.warn('Clock', 'Error ' + bpm); return }
-    this.clearTimer()
-    window.localStorage.setItem('bpm', bpm)
-    this.timer = new Worker(worker)
-    this.timer.postMessage((60000 / parseInt(bpm)) / 4)
-    this.timer.onmessage = (event) => {
-      client.io.midi.sendClock()
-      client.run()
-    }
+    // if (bpm < 60) { console.warn('Clock', 'Error ' + bpm); return }
+    // this.clearTimer()
+    // window.localStorage.setItem('bpm', bpm)
+    // this.timer = new Worker(worker)
+    // this.timer.postMessage((60000 / parseInt(bpm)) / 4)
+    // this.timer.onmessage = (event) => {
+    //   client.io.midi.sendClock()
+    //   client.run()
+    // }
   }
 
   this.clearTimer = function () {
-    if (this.timer) {
-      this.timer.terminate()
-    }
-    this.timer = null
+    // if (this.timer) {
+    //   this.timer.terminate()
+    // }
+    // this.timer = null
   }
 
   this.setFrame = function (f) {
